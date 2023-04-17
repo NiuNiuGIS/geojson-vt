@@ -1,26 +1,32 @@
-
 import simplify from './simplify.js';
 import createFeature from './feature.js';
 
 // converts GeoJSON feature into an intermediate projected JSON vector format with simplification data
-
+//
 export default function convert(data, options) {
     const features = [];
     if (data.type === 'FeatureCollection') {
         for (let i = 0; i < data.features.length; i++) {
             convertFeature(features, data.features[i], options, i);
         }
-
     } else if (data.type === 'Feature') {
         convertFeature(features, data, options);
-
     } else {
         // single geometry or a geometry collection
-        convertFeature(features, {geometry: data}, options);
+        convertFeature(features, { geometry: data }, options);
     }
 
     return features;
 }
+
+convert.prototype.projectX = function (x) {
+    return x / 360 + 0.5;
+};
+convert.prototype.projectY = function (y) {
+    const sin = Math.sin((y * Math.PI) / 180);
+    const y2 = 0.5 - (0.25 * Math.log((1 + sin) / (1 - sin))) / Math.PI;
+    return y2 < 0 ? 0 : y2 > 1 ? 1 : y2;
+};
 
 function convertFeature(features, geojson, options, index) {
     if (!geojson.geometry) return;
@@ -37,15 +43,12 @@ function convertFeature(features, geojson, options, index) {
     }
     if (type === 'Point') {
         convertPoint(coords, geometry);
-
     } else if (type === 'MultiPoint') {
         for (const p of coords) {
             convertPoint(p, geometry);
         }
-
     } else if (type === 'LineString') {
         convertLine(coords, geometry, tolerance, false);
-
     } else if (type === 'MultiLineString') {
         if (options.lineMetrics) {
             // explode into linestrings to be able to track metrics
@@ -58,10 +61,8 @@ function convertFeature(features, geojson, options, index) {
         } else {
             convertLines(coords, geometry, tolerance, false);
         }
-
     } else if (type === 'Polygon') {
         convertLines(coords, geometry, tolerance, true);
-
     } else if (type === 'MultiPolygon') {
         for (const polygon of coords) {
             const newPolygon = [];
@@ -70,11 +71,16 @@ function convertFeature(features, geojson, options, index) {
         }
     } else if (type === 'GeometryCollection') {
         for (const singleGeometry of geojson.geometry.geometries) {
-            convertFeature(features, {
-                id,
-                geometry: singleGeometry,
-                properties: geojson.properties
-            }, options, index);
+            convertFeature(
+                features,
+                {
+                    id,
+                    geometry: singleGeometry,
+                    properties: geojson.properties,
+                },
+                options,
+                index
+            );
         }
         return;
     } else {
@@ -85,7 +91,7 @@ function convertFeature(features, geojson, options, index) {
 }
 
 function convertPoint(coords, out) {
-    out.push(projectX(coords[0]), projectY(coords[1]), 0);
+    out.push(convert.prototype.projectX(coords[0]), convert.prototype.projectY(coords[1]), 0);
 }
 
 function convertLine(ring, out, tolerance, isPolygon) {
@@ -93,8 +99,8 @@ function convertLine(ring, out, tolerance, isPolygon) {
     let size = 0;
 
     for (let j = 0; j < ring.length; j++) {
-        const x = projectX(ring[j][0]);
-        const y = projectY(ring[j][1]);
+        const x = convert.prototype.projectX(ring[j][0]);
+        const y = convert.prototype.projectY(ring[j][1]);
 
         out.push(x, y, 0);
 
@@ -127,12 +133,12 @@ function convertLines(rings, out, tolerance, isPolygon) {
     }
 }
 
-function projectX(x) {
-    return x / 360 + 0.5;
-}
+// function projectX(x) {
+//     return x / 360 + 0.5;
+// }
 
-function projectY(y) {
-    const sin = Math.sin(y * Math.PI / 180);
-    const y2 = 0.5 - 0.25 * Math.log((1 + sin) / (1 - sin)) / Math.PI;
-    return y2 < 0 ? 0 : y2 > 1 ? 1 : y2;
-}
+// function projectY(y) {
+//     const sin = Math.sin((y * Math.PI) / 180);
+//     const y2 = 0.5 - (0.25 * Math.log((1 + sin) / (1 - sin))) / Math.PI;
+//     return y2 < 0 ? 0 : y2 > 1 ? 1 : y2;
+// }
