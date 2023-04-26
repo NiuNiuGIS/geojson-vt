@@ -1,6 +1,6 @@
-
 const options = {
-    debug: 1
+    debug: 1,
+    crs: 'EPSG:4490',//ly2023
 };
 
 const padding = 8 / 512;
@@ -10,7 +10,7 @@ let tileIndex;
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const height = canvas.height = canvas.width = window.innerHeight - 5;
+const height = (canvas.height = canvas.width = window.innerHeight - 5);
 const ratio = height / totalExtent;
 const pad = 4096 * padding * ratio;
 
@@ -95,7 +95,6 @@ function drawSquare(left, top) {
 }
 
 function drawTile() {
-
     console.time(`getting tile z${z}-${x}-${y}`);
     const tile = tileIndex.getTile(z, x, y);
     console.timeEnd(`getting tile z${z}-${x}-${y}`);

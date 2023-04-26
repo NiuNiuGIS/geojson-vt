@@ -1,4 +1,3 @@
-
 var geojsonvt = require('../src/index.js');
 
 console.time('load data');
@@ -6,7 +5,8 @@ var data = require('./data/hrr.json');
 console.timeEnd('load data');
 
 var tileIndex = geojsonvt(data, {
-	debug: 1
+    debug: 1,
+    crs: 'EPSG:4490', //ly2023
 });
 
 console.time('drill down');
@@ -28,7 +28,6 @@ for (var i = 0; i < 10; i++) {
 console.timeEnd('drill down');
 
 console.log('tiles generated:', tileIndex.total, JSON.stringify(tileIndex.stats));
-
 
 // tileIndex.maxZoom = 14;
 // tileIndex.getTile(14, 4100, 6200);
