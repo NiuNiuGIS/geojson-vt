@@ -15,7 +15,7 @@ let crs = '';
 export default function convert(data, options) {
     const features = [];
     crs = options.crs;
-    console.log(crs);
+    // console.log(crs);
     if (data.type === 'FeatureCollection') {
         for (let i = 0; i < data.features.length; i++) {
             convertFeature(features, data.features[i], options, i);
@@ -24,7 +24,7 @@ export default function convert(data, options) {
         convertFeature(features, data, options);
     } else {
         // single geometry or a geometry collection
-        convertFeature(features, {geometry: data}, options);
+        convertFeature(features, { geometry: data }, options);
     }
 
     return features;
@@ -138,28 +138,28 @@ function convertLines(rings, out, tolerance, isPolygon) {
 function projectX(x) {
     let centerX;
     switch (crs) {
-    case 'EPSG:4490':
-    case 'EPSG:4326':
-        centerX = (crsMap['EPSG:4326']['extent'][2] + crsMap['EPSG:4326']['extent'][0]) / 2;
-        return (x - centerX) / crsMap['EPSG:4326'].width + 0.5;
-    default:
-        return x / 360 + 0.5;
+        case 'EPSG:4490':
+        case 'EPSG:4326':
+            centerX = (crsMap['EPSG:4326']['extent'][2] + crsMap['EPSG:4326']['extent'][0]) / 2;
+            return (x - centerX) / crsMap['EPSG:4326'].width + 0.5;
+        default:
+            return x / 360 + 0.5;
     }
 }
 
 function projectY(y) {
     let centerY;
     switch (crs) {
-    case 'EPSG:4490':
-    case 'EPSG:4326':
-        centerY = (crsMap['EPSG:4326']['extent'][3] + crsMap['EPSG:4326']['extent'][1]) / 2;
-        y = 0.5 - (y - centerY) / crsMap['EPSG:4326'].height;
-        break;
-    default:
-        y =
+        case 'EPSG:4490':
+        case 'EPSG:4326':
+            centerY = (crsMap['EPSG:4326']['extent'][3] + crsMap['EPSG:4326']['extent'][1]) / 2;
+            y = 0.5 - (y - centerY) / crsMap['EPSG:4326'].height;
+            break;
+        default:
+            y =
                 0.5 -
                 (0.25 * Math.log((1 + Math.sin((y * Math.PI) / 180)) / (1 - Math.sin((y * Math.PI) / 180)))) / Math.PI;
-        break;
+            break;
     }
     return y < 0 ? 0 : y > 1 ? 1 : y;
 }

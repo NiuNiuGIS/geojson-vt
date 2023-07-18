@@ -1,6 +1,6 @@
 {
     "name": "@lxc_07/geojsonvt",
-    "version": "1.5.2",
+    "version": "1.5.3",
     "description": "Slice GeoJSON data into vector tiles efficiently",
     "keywords": [
         "spatial",
